@@ -1,0 +1,69 @@
+/**
+ * Created by Jay on 14-4-30.
+ */
+var App = require("weroll/App");
+var app = new App();
+
+var Setting = global.SETTING;
+
+app.addTask(function(cb) {
+    var Model = require("weroll/model/Model");
+    Model.init(Setting.model, function(err) {
+        cb(err);
+    });
+});
+/* initialize MailUtil, SMSUtil, TemplateLib or whatever you want.
+app.addTask(function(cb) {
+    require("weroll/utils/MailUtil").init(Setting.mail, true);
+    require("weroll/utils/TemplateLib").init({ sender:Setting.mail.sender });
+    cb();
+});
+*/
+app.addTask(function(cb) {
+    /* enable CORS
+    require("weroll/web/WebRequestPreprocess").inject("head", function(req, res, next) {
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Credentials", true);
+        res.header("Access-Control-Allow-Headers", "Origin, Content-Type, Content-Length, Authorization, Accept, X-Requested-With");
+        res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS');
+        next();
+    });
+    */
+    /* custom view engine if you need
+    Setting.viewEngine = {
+        //webApp: an instance of Express
+        init: function(webApp, viewPath, useCache) {
+            var engine = require("nunjucks");
+            var engineEnv = engine.configure(viewPath, {
+                autoescape: true,
+                express: webApp,
+                noCache: !useCache,
+                web: {
+                    useCache: useCache
+                }
+            });
+            engine.$setFilter = function(key, func) {
+                engineEnv.addFilter(key, func);
+            };
+            console.log("use view engine: nunjucks");
+            return engine;
+        }
+    };
+    */
+    //create and start a web application
+    var webApp = require("weroll/web/WebApp").start(Setting, function(webApp) {
+        /* setup Ecosystem if you need
+        var Ecosystem = require("weroll/eco/Ecosystem");
+        Ecosystem.init();
+        */
+        /* setup WebSocket function if you need
+        var Realtime = require("weroll/web/Realtime");
+        Realtime.init({ port:"*" }, webApp.$server);
+        */
+        cb();
+    });
+    //extend WebApp if you need
+    require("./server/WebAppExt").extend(webApp);
+});
+
+app.run();

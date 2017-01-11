@@ -1,0 +1,258 @@
+{% extends 'template/user_common_page.html' %}
+
+{% block head_import_script %}
+{{ super() }}
+{% endblock %}
+
+{% block head_custom_script %}
+<script>
+
+    JSON.__formatRender=function(key,value,indent){var render=JSON.__formatRender;var text='',i;indent=indent||0;if(Array.isArray(value)){for(i=0;i<indent;i++){text+=" ";}if(key!==null){text+="\""+key+"\": ";}text+="[\n";for(var i=0;i<value.length;i++){text+=render(null,value[i],indent+2);if(i<value.length-1){text+=",";}text+="\n";}for(i=0;i<indent;i++){text+=" ";}text+="]";}else if(value!==null&&typeof value==='object'&&value.toString()==='[object Object]'){for(i=0;i<indent;i++){text+=" ";}if(key!==null){text+="\""+key+"\": ";}text+="{\n";var keys=Object.keys(value);for(var i=0;i<keys.length;i++){text+=render(keys[i],value[keys[i]],indent+2);if(i<keys.length-1){text+=",";}text+="\n";}for(i=0;i<indent;i++){text+=" ";}text+="}";}else if(typeof value==='number'||typeof value==='boolean'){for(i=0;i<indent;i++){text+=" ";}if(key!==null){text+="\""+key+"\": ";}if(typeof value==='number'){text+=Number(value);}else{text+=value?'true':'false';}text+="";}else{for(i=0;i<indent;i++){text+=" ";}if(key!==null){key=key.replace(/\"/g,"\\\"");text+="\""+key+"\": ";}if(value===null){text+="null";}else if(value===undefined){text+="undefined";}else{value=value.replace(/\"/g,"\\\"");text+='"'+value+'"';}text+="";}return text;}; JSON.format=function(obj){if(typeof obj==='object'){return JSON.__formatRender(null,obj);}}
+
+    var services = {{data.services|json}};
+
+    var selectedAPI;
+
+    window.__callAPIFatalError = function(msg, code) {
+        var resText = $('#response');
+        resText.val('错误代码: ' + code + '\r\n\r\n错误描述: ' + msg + '');
+    }
+
+    function $inited() {
+        if ($user && $user.isLogined) {
+            var info = 'id: ' + $user.id + '<br>';
+            info += 'username: ' + $user.username + '<br>';
+            info += 'phone: ' + $user.phone + '<br>';
+            info += 'email: ' + $user.email + '<br>';
+            info += 'name: ' + $user.name + '<br>';
+            info += 'nickname: ' + $user.nickname + '<br>';
+            info += 'type: ' + $user.type + '<br>';
+            info += '<a href="javascript:showUserInfo()">点击查看更多</a><br>';
+            $('#userInfo').html('<br>' + info);
+        }
+    }
+
+    function showUserInfo() {
+        $callAPI('user.profile', { fields:'_id username nickname phone email type' }, function(data) {
+            var info = "";
+            for (var key in data) {
+                var val = data[key];
+                if (typeof val == 'object') {
+                    val = JSON.stringify(val);
+                }
+                info += '<b>' + key + ':</b> <span style="color: blue">' + String(val) + '</span><br>';
+            }
+            PopupManager.show('<p>' + info + '</p>');
+        });
+    }
+
+    function methodSelected(sel) {
+        var selected = $(sel).val();
+        if (selected == -1) return;
+
+        var i = selected.split(".")[0];
+        var j = selected.split(".")[1];
+
+        var api = services[i].methods[j];
+        selectedAPI = api;
+        var info = $("#info");
+        info.html('');
+        info.append('<p>接口名称: <b>' + api.name + '</b></p>');
+        info.append('<p>接口描述: <b>' + api.desc + '</b></p>');
+        info.append('<p>需要登录: <b>' + (api.security.needLogin ? '是' : '否') + '</b></p>');
+        var params = "";
+        for (var key in api.security.checkParams) {
+            params += '<p style="padding-left: 10px;"><b>- ' + key + '&nbsp;&nbsp;[' + api.security.checkParams[key] + ']</b>';
+            if (String(api.paramsDesc[key]).hasValue()) {
+                params += '<br><span style="font-weight: normal; font-size: 14px;">&nbsp;&nbsp;@' + api.paramsDesc[key] + '<span>';
+            }
+            params += '</p>';
+        }
+        info.append('<p>必须参数:</p>');
+        info.append(params);
+
+        params = "";
+        for (var key in api.security.optionalParams) {
+            params += '<p style="padding-left: 10px;"><b>- ' + key + '&nbsp;&nbsp;[' + api.security.optionalParams[key] + ']</b>';
+            if (String(api.paramsDesc[key]).hasValue()) {
+                params += '<br><span style="font-weight: normal; font-size: 14px;">&nbsp;&nbsp;@' + api.paramsDesc[key] + '<span>';
+            }
+            params += '</p>';
+        }
+        info.append('<p>可选参数:</p>');
+        info.append(params);
+        info.append('<p>权限控制: <b>' + (api.security.allowUserType ? api.security.allowUserType.toString() : '无') + '</b></p>');
+    }
+
+    function fire() {
+        if (!selectedAPI) return;
+        var params = {};
+        try {
+            var val = $('#send').val().trim();
+            var content = val;
+            if (val.indexOf("|md5") > 0) {
+                var matchs = val.match(/"[^\|"]+\|md5"/mg);
+                if (matchs && matchs.length > 0) {
+                    matchs.forEach(function(str) {
+                        var temp = $.md5(str.substring(1, str.length - 1).replace('|md5', ''));
+                        val = val.replace(str, '"' + temp + '"');
+                    });
+                }
+            }
+            params = String(val).hasValue() ? JSON.parse(val) : {};
+
+            $('#send').val(JSON.format ? JSON.format(JSON.parse(content)) : JSON.stringify(JSON.parse(content)));
+        } catch (err) {
+            alert('请求参数JSON解析错误：' + err.toString());
+            return;
+        }
+        var resText = $('#response');
+        resText.val('正在等待服务端响应...');
+        var startTime = Date.now();
+        $callAPI(selectedAPI.name, params, function(data) {
+            showCostTime(Date.now() - startTime);
+            resText.val(JSON.format ? JSON.format(data) : JSON.stringify(data));
+
+            if (selectedAPI.name == "user.login") {
+                $setCookie("userid", data.userid);
+                $setCookie("token", data.token);
+                $setCookie("tokentimestamp", data.tokentimestamp);
+            }
+
+        }, function(code, msg) {
+            showCostTime(Date.now() - startTime);
+            resText.val('错误代码: ' + code + '\r\n\r\n错误描述: ' + msg + '');
+        });
+    }
+
+    function showCostTime(costTime) {
+        $('#callInfo').html('本次请求耗时：' + costTime + ' 毫秒');
+    }
+
+    function resetSend() {
+        var sendText = $('#send');
+        if (!selectedAPI) {
+            sendText.val('');
+            return;
+        }
+        var str = "";
+        try {
+            var obj = {};
+            if (selectedAPI.security.checkParams) {
+                obj = JSON.parse(JSON.stringify(selectedAPI.security.checkParams));
+            }
+            if (selectedAPI.security.optionalParams) {
+                for (var key in selectedAPI.security.optionalParams) {
+                    obj[key] = selectedAPI.security.optionalParams[key];
+                }
+            }
+            str = JSON.stringify(obj);
+        } catch (err) {
+
+        }
+        sendText.val(str);
+    }
+
+    function showMap() {
+        var geoStr = $('#geo').val().trim();
+        var geo = geoStr.split(',');
+        var x = Number(geo[0]);
+        var y = Number(geo[1]);
+        if (geoStr != '' && (isNaN(x) || isNaN(y))) {
+            PopupManager.showAlert('经纬度错误!');
+            return;
+        }
+
+        PopupManager.showExternalPage('/subpage/point_select', 800, 550);
+    }
+
+    function mapReady(page) {
+
+        var geo = $('#geo').val().trim().split(',');
+        var x = Number(geo[0]);
+        var y = Number(geo[1]);
+
+        page.workPoint(x, y, function(x, y) {
+            $('#geo').val(x + ',' + y);
+        });
+    }
+
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="col-3 left_content" style="max-width: 360px; float:left;">
+        <div class="col-10" style=" padding: 20px;">
+            <h4 style="padding-bottom: 10px;">当前登录用户: <b id="userInfo">无</b></h4>
+            <ul class="ul_v_layout" style="list-style: none;">
+                <li>
+                    <p style="padding-bottom: 6px;"><label for="methodSelector">API接口列表</label></p>
+                    <select id="methodSelector" style="width: 240px; height: 30px; padding: 4px;" onchange="methodSelected(this)">
+                        <option value="-1">--------------请选择--------------</option>
+                        {% for service in data.services %}
+                        <optgroup label="{{service.group}}">
+                            {% for method in service.methods %}
+                            <option value="{{service.index}}.{{method.index}}">{{method.name}}</option>
+                            {% endfor %}
+                        </optgroup>
+                        {% endfor %}
+                    </select>
+                </li>
+            </ul>
+        </div>
+        <div class="col-10" style="padding: 20px;">
+            <div id="info" class="col-12">
+
+            </div>
+        </div>
+    </div>
+    <div class="col-7 right_content" style="float:left;">
+        <div style="padding: 20px 20px 20px 40px;">
+            <h3>填写发送数据</h3>
+            <textarea id="send" placeholder="请填写需要发送的JSON数据"></textarea>
+            <p><a style="font-size: 14px; cursor: pointer" href="javascript:resetSend()">重置参数</a></p>
+            <p style="width:100%; text-align: center;">
+                <button id="callBtn" class="btn btn-blue" onclick="fire()">调用接口</button>
+            </p>
+            <h3>服务端响应数据</h3>
+            <textarea id="response" placeholder="目前没有返回数据"></textarea>
+            <p id="callInfo"></p>
+            <p>
+                <input id="md5Plain" placeholder="填写需要转换的明文"> <input id="md5Result" style="width: 280px;"> <button class="btn btn-blue" onclick="javascript:$('#md5Result').val($.md5($('#md5Plain').val().trim()))">MD5转换</button>
+            </p>
+            <p>
+                <label>当前时间戳</label><input type="text" disabled id="nowLabel" value="{{now}}"><button class="btn btn-blue" onclick="javascript:$('#nowLabel').val(Date.now())">刷新当前时间戳</button>
+            </p>
+            <p>
+                <label>经纬度查询</label><input type="text" id="geo" value="121.537483,31.220658"><button class="btn btn-blue" onclick="javascript:showMap()">地图查询</button>
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+
+    .container { text-align: left; }
+
+    .right_content > div > p { padding-top: 5px; padding-bottom: 5px; }
+
+    h3 { padding-bottom: 10px; }
+
+    #info { font-size: 18px; font-weight: bold; }
+    #info b { color: blue; }
+    #info > p { padding-top: 3px; padding-bottom: 3px; }
+
+    #send { padding: 8px; width: 96%; height: 80px; font-size: 14px; }
+    #response { padding: 8px; width: 96%; height: 320px; font-size: 14px; }
+
+    #callBtn { margin-top:10px; margin-bottom: 10px; width: 110px; font-size: 16px; display: inline-block; }
+
+    #nowLabel { margin-left: 5px; margin-right: 5px; padding: 6px; }
+
+    #geo { margin-left: 5px; margin-right: 5px; padding: 6px; width: 280px; }
+
+    #md5Plain, #md5Result { padding: 7px; }
+
+</style>
+{% endblock %}
