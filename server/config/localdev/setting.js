@@ -14,7 +14,14 @@ module.exports = {
             host:"127.0.0.1",
             port:27017,
             name:"weroll_app",
-            option: {}
+            option: {
+                driver:"mongoose",  //or "native"
+                server: {
+                    reconnectTries: Number.MAX_VALUE,
+                    poolSize: 5,
+                    socketOptions: { keepAlive: 120 }
+                }
+            }
         },
          */
         /* redis connection config
