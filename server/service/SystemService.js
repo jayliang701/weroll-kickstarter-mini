@@ -30,7 +30,7 @@ exports.now = function(req, res, params) {
     }
 }
 
-exports.echo = async function(req, res, params) {
+exports.echo = function(req, res, params) {
     var result = { msg:`Hi, ${params.name}` };
     if (params.ip) {
         result.msg += `, your IP address is: ${req._clientIP}`;
