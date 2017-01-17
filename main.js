@@ -29,23 +29,16 @@ app.addTask(function(cb) {
         next();
     });
     */
-    /* custom view engine if you need
+    /* custom view engine if you need, e.g: use ejs
     Setting.viewEngine = {
         //webApp: an instance of Express
         init: function(webApp, viewPath, useCache) {
-            var engine = require("nunjucks");
-            var engineEnv = engine.configure(viewPath, {
-                autoescape: true,
-                express: webApp,
-                noCache: !useCache,
-                web: {
-                    useCache: useCache
-                }
-            });
+            var engine = {};
             engine.$setFilter = function(key, func) {
-                engineEnv.addFilter(key, func);
+                //do nothing
             };
-            console.log("use view engine: nunjucks");
+            webApp.set('view engine', 'ejs');
+            console.log("use view engine: ejs");
             return engine;
         }
     };
