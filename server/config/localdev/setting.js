@@ -26,7 +26,9 @@ module.exports = {
                 common: "weroll_common_"
             },
             ttl:24 * 60 * 60,  //sec,
-            pass:""
+            pass:"",
+            maxLockTime:2 * 60,  //sec
+            releaseLockWhenStart: true
         }
         */
     },
@@ -41,20 +43,11 @@ module.exports = {
         cookieExpireTime:24 * 60 * 60 * 1000  //million sec
         */
     },
-
+    /* update service config */
     upload: {
-        url:"http://up.qiniu.com",
-        ak:"2MEsbdrfmQEAfNo91hOEaXKXF1IYJUIttHgHV6ky",
-        sk:"IyIiaNn66GsLnYzfr9b1r9gZD5_NI4qmLOOCi33A",
-        private_bucket:"mars-er-private-media",
-        public_bucket:"ugeez-jiban",
-        download_bucket:"magicfish-download",
-        private_download_live_time: 120,
-        public_domain: "http://7xu8w0.com2.z0.glb.qiniucdn.com",
-        private_domain: "7xidhb.com2.z0.glb.qiniucdn.com",
-        download_domain: "http://7xoyvk.dl1.z0.glb.clouddn.com"
     },
 
+    //site domain
     site:"http://localhost:3000/",
     siteName:"weroll_mini",
     /* mail service config
@@ -72,28 +65,21 @@ module.exports = {
     */
     /* SMS service config
     sms:{
-        api:"http://utf8.sms.webchinese.cn/?Uid=淘迪叔叔",
-        secret:"87854cc77db024eddf72",
-        limit: {
-            length:70,
-            duration:1,
-            maxPerDay:9999999
-        },
-        validationCodeExpireTime:300
     },
     */
     cdn:{
         res:"http://localhost:3000"
     },
-
+    /* Ecosystem config
     ecosystem: {
-        name: "weroll_mini",
+        name: "mini",
         port: 3001,
         servers : {
-            "another_weroll_app" : {
-                message:"127.0.0.1:3004",
-                api:"127.0.0.1:3002/api"
+            "test" : {
+                message:"127.0.0.1:3101",
+                api:"127.0.0.1:3100/api"
             }
         }
     }
+    */
 };

@@ -7,12 +7,13 @@ exports.config = {
     enabled: true,
     security: {
         //@now 获得服务器当前时间 @format 时间格式,1 - 时间戳,2 - 字符串
-        "now":{ needLogin:false, checkParams:{ format:"int" } }
+        "now":{ needLogin:false, checkParams:{ format:"int" } },
+        //@echo 打个招呼 @name 名字 @ip 是否返回客户端的IP地址
+        "echo":{ needLogin:false, checkParams:{ name:"string" }, optionalParams:{ ip:"boolean" } }
     }
 };
 
 var CODES = require("weroll/ErrorCodes");
-var Setting = global.SETTING;
 
 exports.now = function(req, res, params) {
     var format = params.format;
@@ -27,6 +28,14 @@ exports.now = function(req, res, params) {
     } else {
         res.sayError(CODES.REQUEST_PARAMS_INVALID, "invalid time format");
     }
+}
+
+exports.echo = async function(req, res, params) {
+    var result = { msg:`Hi, ${params.name}` };
+    if (params.ip) {
+        result.msg += `, your IP address is: ${req._clientIP}`;
+    }
+    res.sayOK(result);
 }
 
 

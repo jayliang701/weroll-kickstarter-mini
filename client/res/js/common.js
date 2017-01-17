@@ -480,13 +480,6 @@ function $callAPI(method, data, onSuccess, onError, showLoading) {
         trace('show loading...');
     }
 
-    if (!data) data = {};
-    for (var key in data) {
-        if (typeof data[key] == 'object') {
-            data[key] = JSON.stringify(data[key]);
-        }
-    }
-
     var auth = {};
     var userid = $getCookie("userid");
     if (userid) auth.userid = userid;
@@ -505,8 +498,10 @@ function $callAPI(method, data, onSuccess, onError, showLoading) {
     $.ajax({
         type: "post",
         url: API_GATEWAY,
-        dataType: "json",
-        data: params,
+        headers: {
+            "Content-Type": "application/json; charset=UTF-8"
+        },
+        data: JSON.stringify(params),
         success: function (data, status, xhr) {
             if (data.code == 1) {
                 if (onSuccess) {

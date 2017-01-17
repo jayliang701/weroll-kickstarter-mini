@@ -4,6 +4,23 @@ var FS = require("fs");
 
 var SERVICE_LIST = null;
 
+function renderAPIDoc(req, res, output, user) {
+    var done = function() {
+        var callback = require("url").parse(req.url, true).query.callback;
+        res.writeHead(200, {
+            "Content-Type":"text/plain; charset=utf-8"
+        });
+        res.end(callback + "(" + JSON.stringify(SERVICE_LIST) + ")");
+    }
+    if (SERVICE_LIST) {
+        done();
+    } else {
+        renderRoot(req, res, function(data) {
+            done();
+        }, user);
+    }
+}
+
 function renderRoot(req, res, output, user) {
 
     if (!SERVICE_LIST) {
@@ -64,11 +81,12 @@ function renderRoot(req, res, output, user) {
         //init services
         checkFolder(PATH.join(global.APP_ROOT, "server/service"), doRegisterService);
     }
-    output({ services:SERVICE_LIST });
+    output({});
 }
 
 exports.getRouterMap = function() {
     return [
+        { url: "/__apidoc", view: "__apidoc", handle: renderAPIDoc, needLogin:false },
         { url: "/__test", view: "__test", handle: renderRoot, needLogin:false }
     ];
 }
