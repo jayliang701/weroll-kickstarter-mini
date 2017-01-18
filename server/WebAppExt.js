@@ -22,11 +22,11 @@ exports.extend = function(App) {
                 //no cookies...
                 next(0, user);
             } else {
-                Session.getSharedInstance().check(userid, token, function(flag, sess, err) {
+                Session.getSharedInstance().check(userid, token, function(err, sess) {
                     if (err) {
                         error(err);
                     } else {
-                        if (flag == 1) {
+                        if (sess) {
                             user.isLogined = true;
                             user.id = userid;
                             user._id = userid;

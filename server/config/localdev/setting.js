@@ -44,9 +44,8 @@ module.exports = {
         /* user access session config. enable redis first
         onePointEnter:true,
         cookiePath:"/",
-        secret:"weroll123gowe",
-        cacheExpireTime:3 * 60 * 1000,
-        tokenExpireTime:24 * 60 * 60 * 1000,  //million sec
+        cacheExpireTime:3 * 60,  //sec
+        tokenExpireTime:24 * 60 * 60,  //sec
         cookieExpireTime:24 * 60 * 60 * 1000  //million sec
         */
     },
