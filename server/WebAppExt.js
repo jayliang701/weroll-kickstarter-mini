@@ -6,10 +6,11 @@
 
 exports.extend = function(App) {
     //no any session check
+    /*
     App.handleUserSession = function(req, res, next, error, auth) {
         var user = { isLogined:false };
         next(0, user);
-    };
+    };*/
     /* example codes to implement user session validation
     App.handleUserSession = function(req, res, next, error, auth) {
         var user = { isLogined:false };

@@ -1,3 +1,3 @@
 
 **********%*********
-用户注册验证码: %code%
+Validation Code: %code%
