@@ -36,15 +36,10 @@ exports.extend = function(App) {
                             user.tokentimestamp = tokentimestamp;
                             //parse user extra data
                             if (sess.extra) {
-                                try {
-                                    var extra = JSON.parse(sess.extra);
-                                    user.phone = extra[0];
-                                    user.nickname = extra[1];
-                                    user.gender = Number(extra[2]);
-                                    user.head = extra[3];
-                                } catch (exp) {
-                                    console.err("JSON.parse session's userInfo fail --> " + exp.toString());
-                                }
+                                user.phone = extra[0];
+                                user.nickname = extra[1];
+                                user.gender = Number(extra[2]);
+                                user.head = extra[3];
                             }
                             user.type = parseInt(sess.type);
                             next(1, user);
