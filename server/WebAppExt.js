@@ -11,6 +11,13 @@ exports.extend = function(App) {
         var user = { isLogined:false };
         next(0, user);
     };*/
+
+    //override App.handleUserSession for ignoring user session.
+    App.handleUserSession = function(req, res, next, error, auth) {
+        var user = {isLogined: false};
+        next(0, user);
+    };
+
     /* example codes to implement user session validation
     App.handleUserSession = function(req, res, next, error, auth) {
         var user = { isLogined:false };
