@@ -3,6 +3,7 @@
  */
 module.exports = {
 
+<<<<<<< HEAD
     env:"localdev",
 
     host:"localhost",
@@ -55,41 +56,13 @@ module.exports = {
     },
     /* update service config */
     upload: {
+=======
+    //override vars
+    $VARS:{
+        env:"localdev"
+>>>>>>> c4645f84d3602bd92962c36b78559e9e2ca37239
     },
 
-    //site domain
-    site:"http://localhost:3000/",
-    siteName:"weroll_mini",
-    /* mail service config
-    mail: {
-        stamp: {
-            user:"developer@magicfish.cn",
-            password:"aabbcc",
-            host:"smtp.xxxxx.com",
-            port:465,
-            ssl:true
-        },
-        sender:"developer@magicfish.cn",
-        senderName:"developer"
-    },
-    */
-    /* SMS service config
-    sms:{
-    },
-    */
-    cdn:{
-        res:"http://localhost:3000"
-    },
-    /* Ecosystem config
-    ecosystem: {
-        name: "mini",
-        port: 3001,
-        servers : {
-            "test" : {
-                message:"127.0.0.1:3101",
-                api:"127.0.0.1:3100/api"
-            }
-        }
-    }
-    */
+    //override settings
+    siteName:"weroll-mini-application"
 };
