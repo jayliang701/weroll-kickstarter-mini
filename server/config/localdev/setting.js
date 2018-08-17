@@ -29,6 +29,7 @@ module.exports = {
         },
          */
         /* redis connection config
+        */
         redis: {
             host:"127.0.0.1",
             port:6379,
@@ -41,17 +42,16 @@ module.exports = {
             maxLockTime:2 * 60,  //sec
             releaseLockWhenStart: true
         }
-        */
     },
 
     session: {
-        /* user access session config. enable redis first
-        onePointEnter:true,
+        /* user access session config. enable redis first */
+        secret:"magicFish@2018",
+        onePointEnter:false,
         cookiePath:"/",
         cacheExpireTime:3 * 60,  //sec
         tokenExpireTime:24 * 60 * 60,  //sec
         cookieExpireTime:24 * 60 * 60 * 1000  //million sec
-        */
     },
     /* update service config */
     upload: {

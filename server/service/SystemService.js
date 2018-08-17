@@ -15,7 +15,7 @@ exports.config = {
 
 var CODES = require("weroll/ErrorCodes");
 
-exports.now = function(req, res, params) {
+exports.now = function(params, user) {
     var format = params.format;
     if (format == 1 || format == 2) {
         var now = new Date();
@@ -24,18 +24,18 @@ exports.now = function(req, res, params) {
         } else {
             now = now.toString();
         }
-        res.sayOK({ time:now });
+        return { time:now, user };
     } else {
-        res.sayError(CODES.REQUEST_PARAMS_INVALID, "invalid time format");
+        throw Error.create(CODES.REQUEST_PARAMS_INVALID, "invalid time format");
     }
 }
 
-exports.echo = function(req, res, params) {
+exports.echo = function(params, user, req, res) {
     var result = { msg:`Hi, ${params.name}` };
     if (params.ip) {
         result.msg += `, your IP address is: ${req._clientIP}`;
     }
-    res.sayOK(result);
+    return result;
 }
 
 

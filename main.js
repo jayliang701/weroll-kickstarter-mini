@@ -1,14 +1,14 @@
 /**
  * Created by Jay on 14-4-30.
  */
-var App = require("weroll/App");
-var app = new App();
+const App = require("weroll/App");
+const app = new App();
 
-var Setting = global.SETTING;
+const Setting = global.SETTING;
 
-app.addTask(function(cb) {
-    var Model = require("weroll/model/Model");
-    Model.init(Setting.model, function(err) {
+app.addTask(function (cb) {
+    const Model = require("weroll/model/Model");
+    Model.init(Setting.model, function (err) {
         cb(err);
     });
 });
@@ -19,8 +19,8 @@ app.addTask(function(cb) {
     cb();
 });
 */
-app.addTask(function(cb) {
-    /* enable CORS
+app.addTask(function (cb) {
+    /* register a middleware
     require("weroll/web/WebRequestPreprocess").inject("head", function(req, res, next) {
         res.header("Access-Control-Allow-Origin", "*");
         res.header("Access-Control-Allow-Credentials", true);
@@ -43,8 +43,14 @@ app.addTask(function(cb) {
         }
     };
     */
+   /* use APIServer
+    const server = require("weroll/web/APIServer").createServer();
+    server.start(Setting, (app) => {
+        cb();
+    });
+     */
     //create and start a web application
-    var webApp = require("weroll/web/WebApp").start(Setting, function(webApp) {
+    const webApp = require("weroll/web/WebApp").start(Setting, function (webApp) {
         /* setup Ecosystem if you need
         var Ecosystem = require("weroll/eco/Ecosystem");
         Ecosystem.init();
