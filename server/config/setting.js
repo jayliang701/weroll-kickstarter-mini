@@ -50,6 +50,7 @@ module.exports = {
 
     session: {
         /* user access session config. enable redis first
+        secret:"your jwt secret",
         onePointEnter:true,
         cookiePath:"/",
         cacheExpireTime:3 * 60,  //sec
